@@ -87,6 +87,18 @@ namespace WpfUserInterface
 
 		}
 
+		private async Task<WebsiteDataModel> DownloadWebsiteAsync(string websiteUrl)
+		{
+			var output = new WebsiteDataModel();
+			WebClient client = new WebClient();
+
+			output.WebsiteUrl = websiteUrl;
+			output.WebsiteData = await client.DownloadStringTaskAsync(websiteUrl);
+
+			return output;
+
+		}
+
 		private void ReportWebsiteInfo(WebsiteDataModel data)
 		{
 			resultsWindow.Text += $" { data.WebsiteUrl } downloaded: {data.WebsiteData.Length } characters long. { Environment.NewLine }";
@@ -108,7 +120,9 @@ namespace WpfUserInterface
 			List<Task<WebsiteDataModel>> tasks = new List<Task<WebsiteDataModel>>();
 			foreach (string site in websites)
 			{
-				tasks.Add( Task.Run(() => DownloadWebsite(site)));
+				//tasks.Add( Task.Run(() => DownloadWebsite(site)));
+				tasks.Add(DownloadWebsiteAsync(site));
+
 			}
 
 			var results = await Task.WhenAll(tasks);
