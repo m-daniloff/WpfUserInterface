@@ -42,7 +42,7 @@ namespace WpfUserInterface
 		{
 			var watch = System.Diagnostics.Stopwatch.StartNew();
 
-			await RunDownloadAsync();
+			await RunDownloadParallelAsync();
 
 			watch.Stop();
 			var elapsedMs = watch.ElapsedMilliseconds;
@@ -105,10 +105,16 @@ namespace WpfUserInterface
 		private async Task RunDownloadParallelAsync()
 		{
 			var websites = PrepData();
+			List<Task<WebsiteDataModel>> tasks = new List<Task<WebsiteDataModel>>();
 			foreach (string site in websites)
 			{
-				WebsiteDataModel results = await Task.Run(() => DownloadWebsite(site));
-				ReportWebsiteInfo(results);
+				tasks.Add( Task.Run(() => DownloadWebsite(site)));
+			}
+
+			var results = await Task.WhenAll(tasks);
+			foreach(var item in results)
+			{
+				ReportWebsiteInfo(item);
 			}
 		}
 	}
